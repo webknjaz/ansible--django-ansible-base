@@ -15,21 +15,29 @@
       set_fact:
         # setuptools-scm will strip leading 0's off the date format so we need to do that too
         release_number: "{{ (ansible_date_time.date | to_datetime('%Y-%m-%d')).strftime('%Y.%m.%d') | regex_replace('\\.0', '.') }}"
+      tags:
+        - always
 
     - name: Tag the repo
       command:
         cmd: "git tag -f {{ release_number }}"
+      tags:
+        - always
 
     - name: Get the build number from setuptools-scm
       command:
         cmd: python -m setuptools_scm
       register: setuptools_command_version
+      tags:
+        - always
 
     - name: Make sure the selected release number and setuptools_scm agree
       assert:
         that:
           release_number == setuptools_command_version.stdout
         msg: "We expected the release number to be {{ release_number }} but setuptools-scm wanted it to be {{ setuptools_command_version.stdout }}"
+      tags:
+        - always
 
     - name: Build django-ansible-base
       command:
